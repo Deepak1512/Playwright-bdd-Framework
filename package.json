@@ -1,0 +1,25 @@
+{
+  "name": "playwright-bdd-framework",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  "test": "cucumber-js --require-module ts-node/register --require src/**/*.ts features/**/*.feature --parallel 2 --format allure-cucumberjs/reporter",
+  "report": "allure generate allure-results --clean",
+  "open": "allure open allure-report",
+  "test:allure": "npm test & npm run report & npm run open"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@cucumber/cucumber": "^12.6.0",
+    "@playwright/test": "^1.58.2",
+    "allure-commandline": "^2.36.0",
+    "allure-cucumberjs": "^3.4.5",
+    "dotenv": "^17.3.1",
+    "playwright": "^1.58.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

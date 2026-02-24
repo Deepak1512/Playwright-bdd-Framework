@@ -1,0 +1,31 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"As a user
+  I want to access and view the login page
+  So that I can authenticate into the application","98","Verify ""OrangeHRM OS 5.8"" version text is displayed","","2026-02-24","skipped","2026-02-24","","","",""
+"As a user
+  I want to access and view the login page
+  So that I can authenticate into the application","154","Verify login page loads successfully","","2026-02-24","skipped","2026-02-24","","","",""
+"As a user
+  I want to access and view the login page
+  So that I can authenticate into the application","91","Verify Password label and icon are displayed correctly","","2026-02-24","passed","2026-02-24","","","",""
+"As a user
+  I want to access and view the login page
+  So that I can authenticate into the application","95","Verify grey information box displays default credentials correctly","","2026-02-24","passed","2026-02-24","","","",""
+"As a user
+  I want to access and view the login page
+  So that I can authenticate into the application","97","Verify Username label and icon are displayed correctly","","2026-02-24","passed","2026-02-24","","","",""
+"As a user
+  I want to access and view the login page
+  So that I can authenticate into the application","123","Verify ""Login"" heading text is displayed correctly","","2026-02-24","passed","2026-02-24","","","",""
+"As a user
+  I want to access and view the login page
+  So that I can authenticate into the application","99","Verify copyright text is displayed correctly","","2026-02-24","passed","2026-02-24","","","",""
+"As a user
+  I want to access and view the login page
+  So that I can authenticate into the application","176","Verify OrangeHRM logo is displayed at the top center of the page","","2026-02-24","passed","2026-02-24","","","",""
+"As a user
+  I want to access and view the login page
+  So that I can authenticate into the application","86","Verify social media icons are displayed","","2026-02-24","passed","2026-02-24","","","",""
+"As a user
+  I want to access and view the login page
+  So that I can authenticate into the application","95","Verify Login button is displayed with correct text and color","","2026-02-24","passed","2026-02-24","","","",""

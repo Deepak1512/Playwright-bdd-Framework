@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "test": "cucumber-js --require-module ts-node/register --require src/**/*.ts features/**/*.feature --parallel 2 --format allure-cucumberjs/reporter",
+  "test": "cucumber-js --require-module ts-node/register --require src/**/*.ts --parallel 2 --format allure-cucumberjs/reporter features/**/*.feature",
   "report": "allure generate allure-results --clean",
   "open": "allure open allure-report",
   "test:allure": "npm test & npm run report & npm run open"

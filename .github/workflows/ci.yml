@@ -13,6 +13,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # ✅ Move ENV here (JOB LEVEL)
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      ALLURE_REPORT_URL: https://deepak1512.github.io/Playwright-bdd-Framework/
+      CI: true
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -28,14 +35,8 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      # ✅ Pass Telegram & Allure env variables here
       - name: Run Tests
         run: npm test
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          ALLURE_REPORT_URL: https://deepak1512.github.io/Playwright-bdd-Framework/
-          CI: true
 
       - name: Generate Allure Report
         run: |

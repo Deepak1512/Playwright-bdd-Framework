@@ -2,6 +2,7 @@ import { Before, After, AfterAll, setDefaultTimeout } from "@cucumber/cucumber";
 import { chromium, Browser, Page } from "@playwright/test";
 import dotenv from "dotenv";
 import fs from "fs";
+import path from "path";
 
 import { sendTelegramNotification, sendTelegramPhoto } from "../../utils/telegramNotifier";
 
@@ -10,18 +11,33 @@ dotenv.config();
 setDefaultTimeout(80000);
 
 const resultFile = "./test-results.json";
+const screenshotDir = "./screenshots";
 
 let browser: Browser;
 let page: Page;
 
+//
+// ============================
+// ✅ BEFORE EACH SCENARIO
+// ============================
+//
+
 Before(async function () {
   browser = await chromium.launch({
-  headless: process.env.CI ? true : false
-});
+    headless: process.env.CI ? true : false
+  });
+
   const context = await browser.newContext();
   page = await context.newPage();
   this.page = page;
 });
+
+
+//
+// ============================
+// ✅ AFTER EACH SCENARIO
+// ============================
+//
 
 After(async function (scenario) {
 
@@ -32,9 +48,11 @@ After(async function (scenario) {
 
   const executionTime = new Date().toLocaleString();
 
-  // =============================
-  // ✅ SAVE RESULT TO SHARED FILE
-  // =============================
+  //
+  // ============================
+  // ✅ STORE RESULT
+  // ============================
+  //
 
   let results: any[] = [];
 
@@ -49,11 +67,13 @@ After(async function (scenario) {
 
   fs.writeFileSync(resultFile, JSON.stringify(results, null, 2));
 
-  // =============================
-  // ✅ SEND SCENARIO MESSAGE
-  // =============================
+  //
+  // ============================
+  // ✅ SEND SCENARIO NOTIFICATION
+  // ============================
+  //
 
-  const message = `
+  const scenarioMessage = `
 🚀 *Automation Execution Update*
 
 📌 Scenario: ${scenario.pickle.name}
@@ -61,19 +81,24 @@ After(async function (scenario) {
 ⏰ Time: ${executionTime}
 `;
 
-  await sendTelegramNotification(message);
+  await sendTelegramNotification(scenarioMessage);
 
-  // =============================
-  // ✅ SCREENSHOT FOR PASSED & FAILED
-  // =============================
+  //
+  // ============================
+  // ✅ TAKE SCREENSHOT (PASSED & FAILED)
+  // ============================
+  //
 
   if (["PASSED", "FAILED"].includes(status)) {
 
-    if (!fs.existsSync("./screenshots")) {
-      fs.mkdirSync("./screenshots", { recursive: true });
+    if (!fs.existsSync(screenshotDir)) {
+      fs.mkdirSync(screenshotDir, { recursive: true });
     }
 
-    const screenshotPath = `./screenshots/${safeScenarioName}_${status}.png`;
+    const screenshotPath = path.join(
+      screenshotDir,
+      `${safeScenarioName}_${status}.png`
+    );
 
     await this.page.screenshot({
       path: screenshotPath,
@@ -90,9 +115,11 @@ After(async function (scenario) {
 });
 
 
+//
 // ==================================
 // ✅ FINAL EXECUTION SUMMARY
 // ==================================
+//
 
 AfterAll(async function () {
 
@@ -111,6 +138,11 @@ AfterAll(async function () {
     ? ((passedScenarios / totalScenarios) * 100).toFixed(2)
     : "0";
 
+  // ✅ Get Allure URL from CI env
+  const allureLink =
+    process.env.ALLURE_REPORT_URL ||
+    "Allure report not available";
+
   const summaryMessage = `
 📊 *Automation Execution Summary*
 
@@ -118,10 +150,13 @@ AfterAll(async function () {
 ✅ Passed: ${passedScenarios}
 ❌ Failed: ${failedScenarios}
 📈 Pass Rate: ${passPercentage}%
+
+🔗 *Allure Report:*  
+${allureLink}
 `;
 
   await sendTelegramNotification(summaryMessage);
 
-  // Clean result file after execution
+  // Clean up
   fs.unlinkSync(resultFile);
 });

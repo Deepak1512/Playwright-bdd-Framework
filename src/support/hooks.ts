@@ -5,7 +5,13 @@ import {
   setDefaultTimeout
 } from "@cucumber/cucumber";
 
-import { chromium, Browser, Page, BrowserContext } from "@playwright/test";
+import {
+  chromium,
+  Browser,
+  Page,
+  BrowserContext
+} from "@playwright/test";
+
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
@@ -16,7 +22,6 @@ import {
 } from "../../utils/telegramNotifier";
 
 dotenv.config();
-
 setDefaultTimeout(80000);
 
 const resultFile = "./test-results.json";
@@ -49,7 +54,6 @@ Before(async function () {
   this.page = page;
 });
 
-
 //
 // ============================
 // ✅ AFTER EACH SCENARIO
@@ -58,21 +62,24 @@ Before(async function () {
 
 After(async function (scenario) {
 
-  const status = scenario.result?.status?.toUpperCase() ?? "UNKNOWN";
+  const status =
+    scenario.result?.status?.toUpperCase() ?? "UNKNOWN";
 
   const safeScenarioName = scenario.pickle.name
     .replace(/[^a-zA-Z0-9]/g, "_");
 
   const executionTime = new Date().toLocaleString();
 
-  // ============================
+  // ----------------------------
   // ✅ STORE RESULT
-  // ============================
+  // ----------------------------
 
   let results: any[] = [];
 
   if (fs.existsSync(resultFile)) {
-    results = JSON.parse(fs.readFileSync(resultFile, "utf-8"));
+    results = JSON.parse(
+      fs.readFileSync(resultFile, "utf-8")
+    );
   }
 
   results.push({
@@ -80,11 +87,14 @@ After(async function (scenario) {
     status: status
   });
 
-  fs.writeFileSync(resultFile, JSON.stringify(results, null, 2));
+  fs.writeFileSync(
+    resultFile,
+    JSON.stringify(results, null, 2)
+  );
 
-  // ============================
+  // ----------------------------
   // ✅ SEND SCENARIO MESSAGE
-  // ============================
+  // ----------------------------
 
   const scenarioMessage = `
 🚀 *Automation Execution Update*
@@ -96,9 +106,9 @@ After(async function (scenario) {
 
   await sendTelegramNotification(scenarioMessage);
 
-  // ============================
+  // ----------------------------
   // ✅ SCREENSHOT (PASSED & FAILED)
-  // ============================
+  // ----------------------------
 
   if (["PASSED", "FAILED"].includes(status)) {
 
@@ -122,14 +132,42 @@ After(async function (scenario) {
     );
   }
 
-  // ============================
-  // ✅ CLOSE CONTEXT (IMPORTANT FOR VIDEO)
-  // ============================
+  // ----------------------------
+  // ✅ CLOSE CONTEXT (finalizes video)
+  // ----------------------------
 
-  await context.close(); // Finalizes video
+  await context.close();
+
+  // ----------------------------
+  // ✅ RENAME VIDEO FILE
+  // ----------------------------
+
+  if (fs.existsSync(videoDir)) {
+
+    const files = fs.readdirSync(videoDir);
+
+    const latestVideo = files
+      .filter(file => file.endsWith(".webm"))
+      .sort((a, b) =>
+        fs.statSync(path.join(videoDir, b)).mtimeMs -
+        fs.statSync(path.join(videoDir, a)).mtimeMs
+      )[0];
+
+    if (latestVideo) {
+
+      const oldPath = path.join(videoDir, latestVideo);
+
+      const newPath = path.join(
+        videoDir,
+        `${safeScenarioName}_${status}.webm`
+      );
+
+      fs.renameSync(oldPath, newPath);
+    }
+  }
+
   await browser.close();
 });
-
 
 //
 // ==================================
@@ -139,34 +177,36 @@ After(async function (scenario) {
 
 AfterAll(async function () {
 
-  if (!fs.existsSync(resultFile)) {
-    console.log("No result file found.");
-    return;
+  let results: any[] = [];
+
+  if (fs.existsSync(resultFile)) {
+    results = JSON.parse(
+      fs.readFileSync(resultFile, "utf-8")
+    );
   }
 
-  const results = JSON.parse(fs.readFileSync(resultFile, "utf-8"));
-
   const totalScenarios = results.length;
-  const passedScenarios = results.filter((r: any) => r.status === "PASSED").length;
-  const failedScenarios = results.filter((r: any) => r.status === "FAILED").length;
+  const passedScenarios = results.filter(
+    r => r.status === "PASSED"
+  ).length;
 
-  const passPercentage = totalScenarios > 0
-    ? ((passedScenarios / totalScenarios) * 100).toFixed(2)
-    : "0";
+  const failedScenarios = results.filter(
+    r => r.status === "FAILED"
+  ).length;
 
-  // ✅ Allure link from CI
+  const passPercentage =
+    totalScenarios > 0
+      ? (
+          (passedScenarios / totalScenarios) *
+          100
+        ).toFixed(2)
+      : "0";
+
   const allureLink =
     process.env.ALLURE_REPORT_URL ||
-    "Allure report not available";
+    "https://deepak1512.github.io/Playwright-bdd-Framework/";
 
-  // ✅ GitHub Run Link (for videos artifact)
-  const runId = process.env.GITHUB_RUN_ID;
-  const repo = process.env.GITHUB_REPOSITORY;
-
-  const videoLink =
-    runId && repo
-      ? `https://github.com/${repo}/actions/runs/${runId}`
-      : "Video artifact not available";
+  const videoFolderLink = `${allureLink}videos/`;
 
   const summaryMessage = `
 📊 *Automation Execution Summary*
@@ -177,7 +217,7 @@ AfterAll(async function () {
 📈 Pass Rate: ${passPercentage}%
 
 🎥 *Execution Videos:*  
-${videoLink}
+${videoFolderLink}
 
 🔗 *Allure Report:*  
 ${allureLink}
@@ -185,8 +225,8 @@ ${allureLink}
 
   await sendTelegramNotification(summaryMessage);
 
-  // Clean up
+  // Safe cleanup
   if (fs.existsSync(resultFile)) {
-  fs.unlinkSync(resultFile);
-}
+    fs.unlinkSync(resultFile);
+  }
 });

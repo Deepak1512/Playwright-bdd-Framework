@@ -24,7 +24,7 @@ jobs:
 
     steps:
       # -------------------------
-      # ✅ Checkout Repository
+      # ✅ Checkout Code
       # -------------------------
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -78,15 +78,23 @@ jobs:
           if-no-files-found: ignore
 
       # -------------------------
-      # ✅ Generate Allure Report
+      # ✅ Generate Allure Report + Copy Videos
       # -------------------------
       - name: Generate Allure Report
         if: always()
         run: |
           npx allure generate ./allure-results --clean -o ./allure-report
 
+          # Create videos folder inside Allure report
+          mkdir -p allure-report/videos
+
+          # Copy recorded videos into public folder
+          if [ -d "videos" ]; then
+            cp -r videos/* allure-report/videos/
+          fi
+
       # -------------------------
-      # ✅ Upload Allure Report to Pages
+      # ✅ Upload Allure Report to GitHub Pages
       # -------------------------
       - name: Upload Pages Artifact
         if: always()
@@ -108,7 +116,7 @@ jobs:
 
     steps:
       # -------------------------
-      # ✅ Deploy Allure to GitHub Pages
+      # ✅ Deploy Allure + Videos to GitHub Pages
       # -------------------------
       - name: Deploy to GitHub Pages
         id: deployment

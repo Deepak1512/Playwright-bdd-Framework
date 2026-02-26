@@ -186,5 +186,7 @@ ${allureLink}
   await sendTelegramNotification(summaryMessage);
 
   // Clean up
+  if (fs.existsSync(resultFile)) {
   fs.unlinkSync(resultFile);
+}
 });

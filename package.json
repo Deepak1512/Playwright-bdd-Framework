@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "test": "cucumber-js",
-  "report": "allure generate allure-results --clean",
-  "open": "allure open allure-report",
-  "test:allure": "npm test & npm run report & npm run open"
-},
+    "test": "cucumber-js",
+    "report": "allure generate allure-results --clean",
+    "open": "allure open allure-report",
+    "test:allure": "npm test & npm run report & npm run open"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -21,5 +21,9 @@
     "playwright": "^1.58.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "axios": "^1.13.5",
+    "form-data": "^4.0.5"
   }
 }

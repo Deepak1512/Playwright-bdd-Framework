@@ -38,8 +38,12 @@ export class LoginPage {
   }
 
   async verifyLabelVisible(label: string) {
-    await expect(this.page.getByText(label)).toBeVisible();
-  }
+  const locator = this.page.locator("label.oxd-label", {
+    hasText: label,
+  });
+
+  await expect(locator).toBeVisible();
+}
 
   async verifyVersionTextVisible(versionText: string) {
     await expect(this.page.getByText(versionText)).toBeVisible();

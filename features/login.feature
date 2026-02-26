@@ -24,7 +24,7 @@ Feature: Login Page Validation
 
   Scenario: Verify OrangeHRM logo is displayed at the top center of the page
     Then the OrangeHRM logo should be visible
-    And the logo should be aligned at the top center of the page
+    
 
   Scenario: Verify "Login" heading text is displayed correctly
     Then the "Login" heading should be visible

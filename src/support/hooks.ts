@@ -1,10 +1,19 @@
-import { Before, After, AfterAll, setDefaultTimeout } from "@cucumber/cucumber";
-import { chromium, Browser, Page } from "@playwright/test";
+import {
+  Before,
+  After,
+  AfterAll,
+  setDefaultTimeout
+} from "@cucumber/cucumber";
+
+import { chromium, Browser, Page, BrowserContext } from "@playwright/test";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 
-import { sendTelegramNotification, sendTelegramPhoto } from "../../utils/telegramNotifier";
+import {
+  sendTelegramNotification,
+  sendTelegramPhoto
+} from "../../utils/telegramNotifier";
 
 dotenv.config();
 
@@ -12,8 +21,10 @@ setDefaultTimeout(80000);
 
 const resultFile = "./test-results.json";
 const screenshotDir = "./screenshots";
+const videoDir = "./videos";
 
 let browser: Browser;
+let context: BrowserContext;
 let page: Page;
 
 //
@@ -27,7 +38,13 @@ Before(async function () {
     headless: process.env.CI ? true : false
   });
 
-  const context = await browser.newContext();
+  context = await browser.newContext({
+    recordVideo: {
+      dir: videoDir,
+      size: { width: 1280, height: 720 }
+    }
+  });
+
   page = await context.newPage();
   this.page = page;
 });
@@ -48,11 +65,9 @@ After(async function (scenario) {
 
   const executionTime = new Date().toLocaleString();
 
-  //
   // ============================
   // ✅ STORE RESULT
   // ============================
-  //
 
   let results: any[] = [];
 
@@ -67,11 +82,9 @@ After(async function (scenario) {
 
   fs.writeFileSync(resultFile, JSON.stringify(results, null, 2));
 
-  //
   // ============================
-  // ✅ SEND SCENARIO NOTIFICATION
+  // ✅ SEND SCENARIO MESSAGE
   // ============================
-  //
 
   const scenarioMessage = `
 🚀 *Automation Execution Update*
@@ -83,11 +96,9 @@ After(async function (scenario) {
 
   await sendTelegramNotification(scenarioMessage);
 
-  //
   // ============================
-  // ✅ TAKE SCREENSHOT (PASSED & FAILED)
+  // ✅ SCREENSHOT (PASSED & FAILED)
   // ============================
-  //
 
   if (["PASSED", "FAILED"].includes(status)) {
 
@@ -100,7 +111,7 @@ After(async function (scenario) {
       `${safeScenarioName}_${status}.png`
     );
 
-    await this.page.screenshot({
+    await page.screenshot({
       path: screenshotPath,
       fullPage: true
     });
@@ -111,6 +122,11 @@ After(async function (scenario) {
     );
   }
 
+  // ============================
+  // ✅ CLOSE CONTEXT (IMPORTANT FOR VIDEO)
+  // ============================
+
+  await context.close(); // Finalizes video
   await browser.close();
 });
 
@@ -138,10 +154,19 @@ AfterAll(async function () {
     ? ((passedScenarios / totalScenarios) * 100).toFixed(2)
     : "0";
 
-  // ✅ Get Allure URL from CI env
+  // ✅ Allure link from CI
   const allureLink =
     process.env.ALLURE_REPORT_URL ||
     "Allure report not available";
+
+  // ✅ GitHub Run Link (for videos artifact)
+  const runId = process.env.GITHUB_RUN_ID;
+  const repo = process.env.GITHUB_REPOSITORY;
+
+  const videoLink =
+    runId && repo
+      ? `https://github.com/${repo}/actions/runs/${runId}`
+      : "Video artifact not available";
 
   const summaryMessage = `
 📊 *Automation Execution Summary*
@@ -150,6 +175,9 @@ AfterAll(async function () {
 ✅ Passed: ${passedScenarios}
 ❌ Failed: ${failedScenarios}
 📈 Pass Rate: ${passPercentage}%
+
+🎥 *Execution Videos:*  
+${videoLink}
 
 🔗 *Allure Report:*  
 ${allureLink}

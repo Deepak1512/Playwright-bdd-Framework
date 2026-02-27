@@ -111,7 +111,7 @@ jobs:
       # ✅ Upload Allure Report to GitHub Pages
       # -------------------------
       - name: Upload Pages Artifact
-        if: always()
+        if: ${{ success() }}
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./allure-report

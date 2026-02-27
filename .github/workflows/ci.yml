@@ -62,14 +62,11 @@ jobs:
         run: node generate-summary.js
 
       # -------------------------
-      # ✅ Send Summary To Dashboard Backend
+      # ✅ Send Summary To Dashboard Backend (SAFE FORMAT)
       # -------------------------
       - name: Send Summary To Dashboard
         if: always()
-        run: |
-          curl -X POST https://qa-analytics-backend.onrender.com/api/allure-update \
-          -H "Content-Type: application/json" \
-          -d @summary.json
+        run: curl -X POST "https://qa-analytics-backend.onrender.com/api/allure-update" -H "Content-Type: application/json" --data-binary "@summary.json"
 
       # -------------------------
       # ✅ Upload Screenshots Artifact
